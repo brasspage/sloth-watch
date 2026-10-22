@@ -9,7 +9,7 @@
     "server": "temporal server start-dev --db-filename sloth.db",
     "worker": "node src/worker.js",
     "start": "node src/start.js",
-    "test": "node --test --test-concurrency=1 test/lib.test.js && node --test --test-concurrency=1 test/workflow.test.js"
+    "test": "node --test --test-concurrency=1 test/lib.test.js && node --test --test-concurrency=1 test/activities.test.js && node --test --test-concurrency=1 test/workflow.test.js"
   },
   "dependencies": {
     "@temporalio/activity": "1.24.0",

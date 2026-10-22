@@ -4,10 +4,25 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Sloth Watch demo</title>
+    <link rel="icon" href="data:," />
     <meta
       name="description"
       content="A real two-night run of Sloth Watch, with a worker crash in the middle."
     />
+    <meta property="og:title" content="Sloth Watch demo" />
+    <meta
+      property="og:description"
+      content="A real two-night run of Sloth Watch, with a worker crash in the middle."
+    />
+    <meta
+      property="og:image"
+      content="https://brasspage.github.io/sloth-watch/poster.png"
+    />
+    <meta
+      property="og:url"
+      content="https://brasspage.github.io/sloth-watch/"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
     <style>
       :root {
         --bg: #ffffff;
@@ -51,6 +66,7 @@
       img {
         width: 100%;
         height: auto;
+        box-sizing: border-box;
         border-radius: 8px;
         border: 1px solid var(--line);
       }
@@ -63,6 +79,8 @@
         border-radius: 8px;
         padding: 14px 16px;
         overflow-x: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
         font:
           13px/1.45 "SF Mono",
           Menlo,
@@ -104,10 +122,11 @@
         timeline for the run, read bottom to top:
       </p>
       <figure>
-        <img
-          src="timeline.png"
-          alt="Temporal timeline: two searches and a judge call, a retried judge call marked 2, more steps, a 2 minute timer, then night 2"
-        />
+        <a href="timeline.png"
+          ><img
+            src="timeline.png"
+            alt="Temporal timeline: two searches and a judge call, a retried judge call marked 2, more steps, a 2 minute timer, then night 2"
+        /></a>
         <figcaption>
           The long red bar is the judge call that died with the worker. After
           the 1 minute activity timeout it ran again (attempt 2) on the new

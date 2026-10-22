@@ -2,7 +2,7 @@
 
 An overnight agent that reads the news about the tools a small business runs on, and wakes the owner only when one of them needs action.
 
-A café runs on a website builder, a card reader, a Google listing and a newsletter tool. Any of them can shut down, change a price or start a deadline, and the owner hears about it last. Sloth Watch checks each tool once a night, asks an open-weight model which results matter, and writes a short note. Most nights the note says "Nothing needs you. Go back to sleep."
+A café runs on a website builder, a card reader, a Google listing and a newsletter tool. Any of them can shut down, change a price or start a deadline, and the owner hears about it last. Sloth Watch checks each tool once a night, asks an open-weight model which results matter, and writes a short note. On a quiet night the note says "Nothing needs you. Go back to sleep."
 
 An AI agent (Claude, by Anthropic) built this and wrote this README. The human entrant set the goal. Built for the DEV Hacktoberfest 2026 Open-Source AI Challenge, week 3 ("Slow and Steady"), on Oct 22, 2026. Any commit after Oct 25, 2026 will be listed at the end of this file.
 
@@ -60,7 +60,7 @@ To watch your own tools, copy `businesses/little-kettle-cafe.json` and change th
 npm test
 ```
 
-`test/lib.test.js` checks the pure logic. `test/workflow.test.js` runs the real workflow on Temporal's time-skipping test server with fake activities: two nights 24 hours apart, a model reply that fails once, a tool whose search always fails, and continue-as-new. It downloads Temporal's test server the first time.
+`test/lib.test.js` checks the pure logic. `test/activities.test.js` checks that a 429 asks Temporal to wait as long as the server's `retry-after` says. `test/workflow.test.js` runs the real workflow on Temporal's time-skipping test server with fake activities: two nights 24 hours apart, a model reply that fails once, a tool whose search always fails, and continue-as-new. It downloads Temporal's test server the first time.
 
 ## Limits
 
