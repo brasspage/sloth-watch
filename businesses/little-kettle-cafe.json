@@ -1,0 +1,30 @@
+{
+  "name": "Little Kettle Cafe (a made-up cafe)",
+  "slug": "little-kettle-cafe",
+  "tools": [
+    {
+      "name": "Solo",
+      "what": "website builder",
+      "query": "Mozilla Solo website builder",
+      "site": "soloist.ai"
+    },
+    {
+      "name": "Square",
+      "what": "card payments",
+      "query": "Square for sellers changes",
+      "site": "squareup.com"
+    },
+    {
+      "name": "Google Business Profile",
+      "what": "Google listing",
+      "query": "Google Business Profile changes",
+      "site": "google.com"
+    },
+    {
+      "name": "Mailchimp",
+      "what": "email newsletter",
+      "query": "Mailchimp free plan changes",
+      "site": "mailchimp.com"
+    }
+  ]
+}
