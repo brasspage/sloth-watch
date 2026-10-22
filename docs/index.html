@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sloth Watch demo</title>
+    <meta
+      name="description"
+      content="A real two-night run of Sloth Watch, with a worker crash in the middle."
+    />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #1d1d1b;
+        --dim: #5f5d58;
+        --box: #f4f3f0;
+        --line: #dddad3;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #14161b;
+          --fg: #e8e6e1;
+          --dim: #a8a49c;
+          --box: #0b0c0f;
+          --line: #2c2f37;
+        }
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          17px/1.55 -apple-system,
+          "Helvetica Neue",
+          sans-serif;
+      }
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 32px 16px 64px;
+      }
+      h1 {
+        font-size: 2.2rem;
+        margin: 0 0 8px;
+      }
+      p.dim,
+      figcaption {
+        color: var(--dim);
+      }
+      video,
+      img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+      }
+      figure {
+        margin: 28px 0;
+      }
+      pre {
+        background: var(--box);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px 16px;
+        overflow-x: auto;
+        font:
+          13px/1.45 "SF Mono",
+          Menlo,
+          monospace;
+      }
+      a {
+        color: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Sloth Watch</h1>
+      <p>
+        An overnight agent that reads the news about the tools a small business
+        runs on, and wakes the owner only when one of them needs action. Built
+        on Temporal, SerpApi and gpt-oss-20b, an open-weight model.
+      </p>
+      <p class="dim">
+        A real run on Oct 22, 2026, for a made-up café that uses real tools. An
+        AI agent (Claude, by Anthropic) built this and made this page. The human
+        entrant set the goal.
+      </p>
+
+      <figure>
+        <video
+          controls
+          preload="metadata"
+          poster="poster.png"
+          src="demo.mp4"
+        ></video>
+        <figcaption>51 seconds, no sound.</figcaption>
+      </figure>
+
+      <h2>The crash</h2>
+      <p>
+        Partway through night 1, the worker was killed with
+        <code>kill -9</code> and started again 5 seconds later. Temporal's
+        timeline for the run, read bottom to top:
+      </p>
+      <figure>
+        <img
+          src="timeline.png"
+          alt="Temporal timeline: two searches and a judge call, a retried judge call marked 2, more steps, a 2 minute timer, then night 2"
+        />
+        <figcaption>
+          The long red bar is the judge call that died with the worker. After
+          the 1 minute activity timeout it ran again (attempt 2) on the new
+          worker. The 2 searches that had finished were not run again. Then a 2
+          minute durable timer (24 hours in real use) and night 2, which took 10
+          seconds.
+        </figcaption>
+      </figure>
+
+      <h2>The note from night 1</h2>
+      <pre>
+Sloth Watch for Little Kettle Cafe (a made-up cafe), 2026-10-22
+3 tools need you. 7 FYI, 8 noise.
+
+Needs you:
+- Solo (website builder): All Solo websites and data will be deleted on November 30, 2026, as stated in the shutdown FAQ. By 2026-11-30. https://support.soloist.ai/doc/solo-shutdown-faq (+6 more on this)
+- Google Business Profile (Google listing): Google can change the business profile without approval, so regular monitoring is recommended. https://www.the3marketers.com/google-changed-your-business-profile-heres-why (+2 more on this)
+- Mailchimp (email newsletter): Mailchimp's 2026 price increase limits the free plan to 250 contacts and 500 sends per month, requiring a paid plan for more. https://www.activecampaign.com/blog/mailchimp-price-increase (+6 more on this)
+
+FYI: 7 lines, in the full note.</pre>
+      <p>
+        Solo: real, from Solo's own FAQ. Google: a false alarm. Mailchimp: from
+        a competitor's blog, so check it first. Every line carries its link for
+        that reason.
+        <a
+          href="https://github.com/brasspage/sloth-watch/blob/main/examples/little-kettle-cafe-2026-10-22-night1.md"
+          >The full note</a
+        >.
+      </p>
+
+      <h2>Code</h2>
+      <p>
+        <a href="https://github.com/brasspage/sloth-watch"
+          >github.com/brasspage/sloth-watch</a
+        >
+        (MIT).
+      </p>
+    </main>
+  </body>
+</html>

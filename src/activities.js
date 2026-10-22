@@ -15,7 +15,10 @@ Write "why" as one plain sentence to the owner. Use only facts in the result tex
 "deadline" is a date stated in the result text (YYYY-MM-DD), or null. Never guess a date.
 Reply with JSON only, one entry per result: {"items":[{"i":0,"verdict":"ignore","why":"...","deadline":null}]}`;
 
-export function makeActivities({ fetch = globalThis.fetch, env = process.env } = {}) {
+export function makeActivities({
+  fetch = globalThis.fetch,
+  env = process.env,
+} = {}) {
   const notesDir = env.NOTES_DIR ?? "notes";
 
   async function searchWeb(query, window = "w") {
@@ -39,7 +42,7 @@ export function makeActivities({ fetch = globalThis.fetch, env = process.env } =
       throw new Error(`SerpApi: ${data.error}`);
     }
     return (data.organic_results ?? [])
-      .filter((r) => /^https?:\/\//.test(r.link ?? ""))
+      .filter((r) => /^https:\/\//.test(r.link ?? "")) // https only: this link is the one the owner clicks
       .map((r) => ({
         title: String(r.title ?? "").slice(0, 200),
         link: r.link,
@@ -51,28 +54,34 @@ export function makeActivities({ fetch = globalThis.fetch, env = process.env } =
 
   async function judge({ business, tool, items, date }) {
     const stories = items
-      .map((s, i) => `${i}. ${s.title} (${s.source}, ${s.date || "no date"})\n${s.snippet}`)
+      .map(
+        (s, i) =>
+          `${i}. ${s.title} (${s.source}, ${s.date || "no date"})\n${s.snippet}`,
+      )
       .join("\n\n");
-    const res = await fetch(`${env.LLM_BASE_URL ?? "https://api.groq.com/openai/v1"}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${env.LLM_API_KEY ?? ""}`,
+    const res = await fetch(
+      `${env.LLM_BASE_URL ?? "https://api.groq.com/openai/v1"}/chat/completions`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${env.LLM_API_KEY ?? ""}`,
+        },
+        body: JSON.stringify({
+          model: env.LLM_MODEL ?? "openai/gpt-oss-20b",
+          temperature: 0,
+          max_tokens: 4000, // gpt-oss thinks first; too small a budget leaves no room for the answer
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: SYSTEM },
+            {
+              role: "user",
+              content: `Business: ${business}. Today: ${date}.\nTool: ${tool.name} (${tool.what}).\n\nStories:\n${stories}`,
+            },
+          ],
+        }),
       },
-      body: JSON.stringify({
-        model: env.LLM_MODEL ?? "openai/gpt-oss-20b",
-        temperature: 0,
-        max_tokens: 4000, // gpt-oss thinks first; too small a budget leaves no room for the answer
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: SYSTEM },
-          {
-            role: "user",
-            content: `Business: ${business}. Today: ${date}.\nTool: ${tool.name} (${tool.what}).\n\nStories:\n${stories}`,
-          },
-        ],
-      }),
-    });
+    );
     if (res.status === 401 || res.status === 403)
       throw ApplicationFailure.nonRetryable(`model server said ${res.status}`);
     if (res.status === 429) {
@@ -87,9 +96,15 @@ export function makeActivities({ fetch = globalThis.fetch, env = process.env } =
     if (!res.ok) throw new Error(`model server said ${res.status}`); // retried
     const data = await res.json();
     const tokens = data.usage?.total_tokens ?? 0;
-    console.log(`[judge] ${tool.name}: ${items.length} stories, ${tokens} tokens`);
+    console.log(
+      `[judge] ${tool.name}: ${items.length} stories, ${tokens} tokens`,
+    );
     // A malformed reply throws here, and Temporal asks the model again.
-    return parseVerdicts(data.choices?.[0]?.message?.content ?? "", items.length, date);
+    return parseVerdicts(
+      data.choices?.[0]?.message?.content ?? "",
+      items.length,
+      date,
+    );
   }
 
   async function saveNote({ slug, date, night, text }) {

@@ -39,18 +39,34 @@ export function parseVerdicts(text, count, today = "") {
       /^\d{4}-\d{2}-\d{2}$/.test(v.deadline ?? "") && v.deadline > today
         ? v.deadline
         : null;
-    const why = String(v.why ?? "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 240);
-    out.push({ i: v.i, verdict: v.verdict, why, deadline });
+    out.push({ i: v.i, verdict: v.verdict, why: cleanWhy(v.why), deadline });
   }
   return out;
 }
 
+// "why" is model text built from web pages, so it can carry a planted link or
+// markdown. Keep the words, drop every link, escape the rest.
+export function cleanWhy(text) {
+  return String(text ?? "")
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 240)
+    .replace(/[\\`*_{}[\]()#+!|<>~]/g, "\\$&")
+    .replace(
+      /\bhttps?:\/\/\S+|\bwww\.\S+|\b[\w-]+(\.[\w-]+)*\.[a-z]{2,}(\/\S*)?/gi,
+      "[link removed]",
+    );
+}
+
+// The only link in a note line: the search result's own, and only https.
+export const safeLink = (link) =>
+  /^https:\/\/[^\s<>()[\]]+$/.test(link ?? "") ? link : "";
+
 // True when the link is on the tool maker's own site (or a subdomain of it).
 export function isOfficial(link, site) {
-  const host = (/^https?:\/\/([^/:?#]+)/i.exec(link ?? "") ?? [])[1]?.toLowerCase();
+  const host = (/^https?:\/\/([^/:?#]+)/i.exec(link ?? "") ??
+    [])[1]?.toLowerCase();
   return Boolean(site && host && (host === site || host.endsWith(`.${site}`)));
 }
 
@@ -84,19 +100,22 @@ export function formatNote({ business, date, findings, problems = [] }) {
       : `Nothing needs you. ${fyi.length} FYI, ${noise} noise. Go back to sleep.`,
   );
   if (actions.length) {
-    lines.push("", "Needs you:");
+    lines.push("", "Needs you:", "");
     for (const a of actions) {
       const by = a.deadline ? ` By ${a.deadline}.` : "";
       const more = a.more ? ` (+${a.more} more on this)` : "";
-      lines.push(`- ${a.tool} (${a.what}): ${a.why}${by} ${a.link}${more}`);
+      lines.push(
+        `- ${a.tool} (${a.what}): ${a.why}${by} ${safeLink(a.link)}${more}`,
+      );
     }
   }
   if (fyi.length) {
-    lines.push("", "FYI:");
-    for (const f of fyi) lines.push(`- ${f.tool}: ${f.why} ${f.link}`);
+    lines.push("", "FYI:", "");
+    for (const f of fyi)
+      lines.push(`- ${f.tool}: ${f.why} ${safeLink(f.link)}`);
   }
   if (problems.length) {
-    lines.push("", "Could not check:");
+    lines.push("", "Could not check:", "");
     for (const p of problems) lines.push(`- ${p}`);
   }
   return lines.join("\n") + "\n";

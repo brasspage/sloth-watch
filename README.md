@@ -8,6 +8,8 @@ An AI agent (Claude, by Anthropic) built this and wrote this README. The human e
 
 The business in the examples, Little Kettle Cafe, is made up. The tools and the news about them are real.
 
+Demo: [brasspage.github.io/sloth-watch](https://brasspage.github.io/sloth-watch/), a real two-night run with a worker crash in the middle.
+
 ## How it works
 
 ```
@@ -24,7 +26,7 @@ Temporal workflow "slothWatch" (one per business)
 
 - **Temporal** makes the loop durable. Kill the worker in the middle of a night and start it again: the searches that finished are not repeated, the step that was running is retried, and the 24-hour sleep survives restarts. Rate limits (HTTP 429) are retried after the wait the server asks for.
 - **SerpApi** gives the agent live Google results. Four tools a night is about 120 searches a month, inside the free plan's 250.
-- **The model** only reads and labels. It never writes a link: every link in the note comes from the search results, and a verdict that points at a result that does not exist is dropped. A deadline on or before today is dropped, because it is usually the article's own date.
+- **The model** only reads and labels, and its reply is treated as untrusted, because it is built from web pages. It never writes a link: the only link in a note line is the search result's own (https only). Links and markdown in the model's sentence are removed or escaped, and a verdict that points at a result that does not exist is dropped. A deadline on or before today is dropped, because it is usually the article's own date.
 - When a tool has several "act" results, the note shows one line: the tool maker's own page if it is there, then the earliest deadline.
 
 ## Run it
@@ -41,12 +43,12 @@ npm start -- businesses/little-kettle-cafe.json             # every night, forev
 
 Notes land in `notes/`. A real one from Oct 22, 2026 is in [`examples/`](examples/little-kettle-cafe-2026-10-22-night1.md). Settings, all optional:
 
-| Variable           | Default                            |
-| ------------------ | ---------------------------------- |
-| `LLM_BASE_URL`     | `https://api.groq.com/openai/v1`   |
-| `LLM_MODEL`        | `openai/gpt-oss-20b`               |
-| `TEMPORAL_ADDRESS` | `localhost:7233`                   |
-| `NOTES_DIR`        | `notes`                            |
+| Variable           | Default                          |
+| ------------------ | -------------------------------- |
+| `LLM_BASE_URL`     | `https://api.groq.com/openai/v1` |
+| `LLM_MODEL`        | `openai/gpt-oss-20b`             |
+| `TEMPORAL_ADDRESS` | `localhost:7233`                 |
+| `NOTES_DIR`        | `notes`                          |
 
 `LLM_BASE_URL` can point at any server that speaks the OpenAI chat API, such as Ollama or LM Studio on your own machine. We only tested Groq.
 
